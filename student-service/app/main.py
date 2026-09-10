@@ -9,7 +9,7 @@ from app.db import Base, engine
 from app.routers import students
 from app.storage import ensure_container_exists
 
-# 8.1P trigger the continuous delivery pipeline.
+# 8.1P trigger CI/CD after enabling GitHub Actions.
 
 
 logging.basicConfig(
