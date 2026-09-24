@@ -14,6 +14,7 @@ permissions:
   actions: write
 
 jobs:
+
   smoke-test:
     name: Staging Smoke Test
     runs-on: ubuntu-latest
@@ -25,17 +26,12 @@ jobs:
       name: staging
 
     steps:
-      - name: Login to Azure
-        uses: azure/login@v3
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Get AKS credentials
-        run: |
-          az aks get-credentials \
-            --resource-group ${{ vars.AKS_RESOURCE_GROUP }} \
-            --name ${{ vars.AKS_CLUSTER_NAME }} \
-            --overwrite-existing
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
       - name: Wait for staging frontend IP
         run: |
@@ -52,6 +48,7 @@ jobs:
             fi
 
             echo "Waiting for staging frontend IP..."
+
             sleep 10
           done
 
@@ -71,8 +68,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
         run: |
-          echo "Staging test passed."
-          echo "Triggering production deployment for image: $IMAGE_TAG"
+          echo "Staging smoke test passed."
+          echo "Promoting tested image to production."
+          echo "Image tag: $IMAGE_TAG"
 
           gh workflow run "04 - Deploy to Production" \
             --ref main \
