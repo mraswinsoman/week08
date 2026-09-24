@@ -27,6 +27,11 @@ jobs:
 
     steps:
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
       - name: Set Kubernetes context
         uses: azure/k8s-set-context@v4
         with:
@@ -48,7 +53,6 @@ jobs:
             fi
 
             echo "Waiting for staging frontend IP..."
-
             sleep 10
           done
 
